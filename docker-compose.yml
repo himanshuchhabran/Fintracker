@@ -1,0 +1,41 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: mudra_plan_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}  
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  
+      POSTGRES_DB: mudra_plan
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  server:
+    build: ./server
+    container_name: mudra_plan_server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules # Exclude node_modules from the volume mount
+    environment:
+      DB_USER: ${POSTGRES_USER} 
+      DB_HOST: postgres-db
+      DB_DATABASE: mudra_plan
+      DB_PASSWORD:  ${POSTGRES_PASSWORD}
+      DB_PORT: 5432
+    depends_on:
+      - postgres-db
+
+  client:
+    build: ./client
+    container_name: mudra_plan_client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules # Exclude node_modules from the volume mount
+
+volumes:
+  postgres_data:

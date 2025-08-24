@@ -1,0 +1,13 @@
+# .gitignore file
+
+# Dependencies
+/node_modules
+
+# Frontend Build folder
+/client/dist
+
+# Environment files
+.env
+.env.local
+
+# ... other ignored files
