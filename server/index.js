@@ -2,6 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const userRoutes = require("./routes/user");
 const app = express();
+const pool = require("./config/db");
 
 require("dotenv").config();
 const port = process.env.PORT || 5000;
@@ -9,14 +10,6 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 
 
-// PostgreSQL connection configuration
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
 
 app.use("/api",userRoutes);
 
@@ -24,8 +17,9 @@ app.use("/api",userRoutes);
 app.get('/test-db', async (req, res) => {
   try {
     const client = await pool.connect();
-    res.send('Successfully connected to the database!');
+    await client.query("SELECT NOW()");
     client.release();
+    res.send('Successfully connected to the database!');
   } catch (err) {
     console.error('Error connecting to the database', err);
     res.status(500).send('Failed to connect to the database.');

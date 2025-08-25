@@ -1,4 +1,5 @@
-exports.auth = (req, res, next) => {
+const jwt = require("jsonwebtoken")
+exports.authenticateToken = (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1]; //bearer token
