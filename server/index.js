@@ -1,8 +1,13 @@
 const express = require('express');
 const { Pool } = require('pg');
-
+const userRoutes = require("./routes/user");
 const app = express();
-const port = 5000;
+
+require("dotenv").config();
+const port = process.env.PORT || 5000;
+// Middleware to parse JSON bodies
+app.use(express.json());
+
 
 // PostgreSQL connection configuration
 const pool = new Pool({
@@ -12,6 +17,8 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
+
+app.use("/api",userRoutes);
 
 // A test route to check database connection
 app.get('/test-db', async (req, res) => {

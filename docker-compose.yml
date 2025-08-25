@@ -15,7 +15,7 @@ services:
     build: ./server
     container_name: mudra_plan_server
     ports:
-      - "5000:5000"
+      - "${Server_PORT}:${Server_PORT}"
     volumes:
       - ./server:/app
       - /app/node_modules # Exclude node_modules from the volume mount
