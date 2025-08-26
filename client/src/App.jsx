@@ -1,10 +1,35 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import Register from './components/Register';
 import Login from './components/Login';
-import { useState } from 'react';
-import './App.css';
+import VerifyOTP from './components/verifyOTP';
+
 function App() {
   const [activeForm, setActiveForm] = useState('login');
+  const [emailToVerify, setEmailToVerify] = useState('');
+
+  const handleRegisterSuccess = (email) => {
+    setEmailToVerify(email);
+    setActiveForm('verify');
+  };
+
+  const handleVerificationSuccess = () => {
+    setEmailToVerify('');
+    setActiveForm('login');
+  };
+
+  // This function correctly decides which form to show
+  const renderForm = () => {
+    switch (activeForm) {
+      case 'register':
+        return <Register onRegisterSuccess={handleRegisterSuccess} onSwitchForm={() => setActiveForm('login')} />;
+      case 'verify':
+        return <VerifyOTP email={emailToVerify} onVerificationSuccess={handleVerificationSuccess} />;
+      case 'login':
+      default:
+        return <Login onSwitchForm={() => setActiveForm('register')} />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -25,26 +50,28 @@ function App() {
         {/* Right Side: Forms */}
         <div className="p-8 sm:p-12">
           <div className="w-full max-w-md mx-auto">
-            <div className="flex border-b border-gray-200 mb-8">
-              <button
-                onClick={() => setActiveForm('login')}
-                className={`w-1/2 py-4 text-center font-semibold transition-colors duration-300 ${activeForm === 'login' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-emerald-500'}`}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => setActiveForm('register')}
-                className={`w-1/2 py-4 text-center font-semibold transition-colors duration-300 ${activeForm === 'register' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-emerald-500'}`}
-              >
-                Register
-              </button>
-            </div>
             
-            {activeForm === 'login' ? (
-              <Login onSwitchForm={() => setActiveForm('register')} />
-            ) : (
-              <Register onSwitchForm={() => setActiveForm('login')} />
+            {/* Hide tabs on the OTP verification screen for a cleaner UI */}
+            {activeForm !== 'verify' && (
+              <div className="flex border-b border-gray-200 mb-8">
+                <button
+                  onClick={() => setActiveForm('login')}
+                  className={`w-1/2 py-4 text-center font-semibold transition-colors duration-300 ${activeForm === 'login' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-emerald-500'}`}
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setActiveForm('register')}
+                  className={`w-1/2 py-4 text-center font-semibold transition-colors duration-300 ${activeForm === 'register' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-emerald-500'}`}
+                >
+                  Register
+                </button>
+              </div>
             )}
+            
+            {/* CORRECTED: Call the renderForm function to display the correct component */}
+            {renderForm()}
+
           </div>
         </div>
 

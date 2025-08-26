@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
-const Register = ({ onSwitchForm }) => {
+const Register = ({ onRegisterSuccess, onSwitchForm }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [message, setMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { email, password } = formData;
 
@@ -15,8 +16,9 @@ const Register = ({ onSwitchForm }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setIsSuccess(false);
+    setIsError(false);
     setMessage('');
+    setIsLoading(true);
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -27,16 +29,17 @@ const Register = ({ onSwitchForm }) => {
       const data = await res.json();
 
       if (res.ok) {
-        setIsSuccess(true);
-        setMessage('Registration successful! You can now log in.');
+        onRegisterSuccess(email);
       } else {
-        setIsSuccess(false);
+        setIsError(true);
         setMessage(data.message || 'Registration failed.');
       }
     } catch (err) {
-      setIsSuccess(false);
+      setIsError(true);
       setMessage('Server error. Please try again later.');
       console.error(err);
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -78,13 +81,14 @@ const Register = ({ onSwitchForm }) => {
         </div>
         <button
           type="submit"
-          className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-200"
+          disabled={isLoading}
+          className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-200 disabled:bg-emerald-400"
         >
-          Register
+          {isLoading ? 'Sending OTP...' : 'Register'}
         </button>
       </form>
       {message && (
-        <p className={`mt-4 text-sm text-center font-medium ${isSuccess ? 'text-green-600' : 'text-red-600'}`}>
+        <p className={`mt-4 text-sm text-center font-medium ${isError ? 'text-red-600' : ''}`}>
           {message}
         </p>
       )}

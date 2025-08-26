@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const {login,signup} = require("../controllers/Auth");
+const {login,signup,verifyOTP} = require("../controllers/Auth");
 const {authenticateToken} = require("../middlewares/auth");
+
 router.post("/auth/login",login);
 router.post("/auth/register",signup);
+router.post("/auth/verify-otp",verifyOTP);
 
 
 router.get('/dashboard', authenticateToken, (req, res) => {

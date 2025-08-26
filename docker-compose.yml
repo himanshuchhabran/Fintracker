@@ -27,6 +27,8 @@ services:
       DB_PORT: 5432
       JWT_SECRET : ${JWT_SECRET}
       SERVER_PORT: ${SERVER_PORT}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
     depends_on:
       - postgres-db 
 
