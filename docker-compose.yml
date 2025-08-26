@@ -15,7 +15,7 @@ services:
     build: ./server
     container_name: mudra_plan_server
     ports:
-      - "${Server_PORT}:${Server_PORT}"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     volumes:
       - ./server:/app
       - /app/node_modules # Exclude node_modules from the volume mount
@@ -25,17 +25,22 @@ services:
       DB_DATABASE: mudra_plan
       DB_PASSWORD:  ${POSTGRES_PASSWORD}
       DB_PORT: 5432
+      JWT_SECRET : ${JWT_SECRET}
+      SERVER_PORT: ${SERVER_PORT}
     depends_on:
-      - postgres-db
+      - postgres-db 
 
   client:
     build: ./client
     container_name: mudra_plan_client
     ports:
-      - "5173:5173"
+      - "${CLIENT_PORT}:${CLIENT_PORT}"
     volumes:
       - ./client:/app
       - /app/node_modules # Exclude node_modules from the volume mount
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+      - CLIENT_PORT=${CLIENT_PORT}
 
 volumes:
   postgres_data:

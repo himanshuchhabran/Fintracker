@@ -4,8 +4,7 @@ const userRoutes = require("./routes/user");
 const app = express();
 const pool = require("./config/db");
 
-require("dotenv").config();
-const port = process.env.PORT || 5000;
+const port = process.env.SERVER_PORT || 5000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
