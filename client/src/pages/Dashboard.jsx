@@ -3,8 +3,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import BudgetManager from '../components/BudgetManager';
-import SpendingPieChart from '../components/SpendingPieChart'; // Import Pie Chart
-import SpendingBarChart from '../components/SpendingBarChart'; // Import Bar Chart
+import SpendingPieChart from '../components/SpendingPieChart';
+import SpendingBarChart from '../components/SpendingBarChart';
+import EditTransactionModal from '../components/EditTransactionModal';
+import EditBudgetModal from '../components/EditBudgetModal';
 
 const Dashboard = ({ onLogout, token }) => {
   const [transactions, setTransactions] = useState([]);
@@ -13,6 +15,12 @@ const Dashboard = ({ onLogout, token }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [transactionToEdit, setTransactionToEdit] = useState(null);
+  
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+  const [budgetToEdit, setBudgetToEdit] = useState(null);
 
   const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
@@ -54,6 +62,26 @@ const Dashboard = ({ onLogout, token }) => {
     fetchDashboardData();
   };
 
+  const handleOpenEditModal = (transaction) => {
+    setTransactionToEdit(transaction);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setTransactionToEdit(null);
+    setIsEditModalOpen(false);
+  };
+  
+  const handleOpenBudgetModal = (budget) => {
+    setBudgetToEdit(budget);
+    setIsBudgetModalOpen(true);
+  };
+
+  const handleCloseBudgetModal = () => {
+    setBudgetToEdit(null);
+    setIsBudgetModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b border-gray-200">
@@ -73,7 +101,6 @@ const Dashboard = ({ onLogout, token }) => {
         </nav>
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Main Dashboard Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Monthly Spending Trend</h3>
@@ -84,18 +111,48 @@ const Dashboard = ({ onLogout, token }) => {
                 <SpendingPieChart chartData={summaryData.spendingByCategory} />
             </div>
         </div>
-
-        {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-1 space-y-8">
             <TransactionForm token={token} onAddTransaction={handleDataUpdate} />
-            <BudgetManager token={token} budgets={budgets} onSetBudget={handleDataUpdate} currentDate={currentDate} />
+            <BudgetManager 
+              token={token} 
+              budgets={budgets} 
+              onSetBudget={handleDataUpdate} 
+              onEditBudget={handleOpenBudgetModal}
+              onDeleteBudget={handleDataUpdate}
+              currentDate={currentDate} 
+            />
           </div>
           <div className="lg:col-span-2">
-            <TransactionList transactions={transactions} isLoading={isLoading} error={error} />
+            <TransactionList 
+              transactions={transactions} 
+              isLoading={isLoading} 
+              error={error}
+              onEdit={handleOpenEditModal}
+              onDelete={handleDataUpdate}
+              token={token}
+            />
           </div>
         </div>
       </main>
+      
+      {isEditModalOpen && (
+        <EditTransactionModal
+          token={token}
+          transaction={transactionToEdit}
+          onClose={handleCloseEditModal}
+          onUpdate={handleDataUpdate}
+        />
+      )}
+      
+      {isBudgetModalOpen && (
+        <EditBudgetModal
+            token={token}
+            budget={budgetToEdit}
+            onClose={handleCloseBudgetModal}
+            onUpdate={handleDataUpdate}
+        />
+      )}
     </div>
   );
 };
