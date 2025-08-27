@@ -1,11 +1,12 @@
+
 import React, { useState } from 'react';
 
 const TransactionForm = ({ token, onAddTransaction }) => {
   const [formData, setFormData] = useState({
     amount: '',
-    category: 'Food', // Default category
+    category: 'Food',
     description: '',
-    transaction_date: new Date().toISOString().split('T')[0], // Default to today
+    transaction_date: new Date().toISOString().split('T')[0],
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +28,7 @@ const TransactionForm = ({ token, onAddTransaction }) => {
         },
         body: JSON.stringify({
           ...formData,
-          amount: parseFloat(amount) // Ensure amount is a number
+          amount: parseFloat(amount)
         }),
       });
 
@@ -36,9 +37,8 @@ const TransactionForm = ({ token, onAddTransaction }) => {
         throw new Error(data.message || 'Failed to add transaction');
       }
       
-      onAddTransaction(data); // Update parent state
+      onAddTransaction(data);
       
-      // Reset form to initial state
       setFormData({
         amount: '',
         category: 'Food',
@@ -55,7 +55,9 @@ const TransactionForm = ({ token, onAddTransaction }) => {
   const categories = ['Food', 'Transport', 'Bills', 'Shopping', 'Entertainment', 'Health', 'Other'];
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 sticky top-8">
+    // --- THIS IS THE FIX ---
+    // I've removed the `sticky top-8` classes from this div
+    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
       <h3 className="text-xl font-bold text-gray-800 mb-6">Add New Expense</h3>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>

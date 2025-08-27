@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const authenticateToken = require('../middleware/authenticateToken');
+const {authenticateToken} = require('../middlewares/auth');
 
 // @route   POST api/budgets
 // @desc    Create or update a budget for a specific category and month

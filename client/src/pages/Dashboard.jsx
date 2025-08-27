@@ -2,41 +2,50 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
+import BudgetManager from '../components/BudgetManager';
 
 const Dashboard = ({ onLogout, token }) => {
   const [transactions, setTransactions] = useState([]);
+  const [budgets, setBudgets] = useState([]);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Using useCallback to memoize the fetch function
-  const fetchTransactions = useCallback(async () => {
+  const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
     setError('');
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+
     try {
-      const res = await fetch('/api/transactions', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to fetch transactions');
+      const [transRes, budgRes] = await Promise.all([
+        fetch(`/api/transactions`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`/api/budgets/${year}/${month}`, { headers: { 'Authorization': `Bearer ${token}` } })
+      ]);
+
+      if (!transRes.ok || !budgRes.ok) {
+        throw new Error('Failed to fetch dashboard data.');
       }
-      const data = await res.json();
-      setTransactions(data);
+
+      const transData = await transRes.json();
+      const budgData = await budgRes.json();
+      
+      setTransactions(transData);
+      setBudgets(budgData);
+
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, [token, currentDate]);
 
-  // Fetch transactions on initial component mount
   useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
-  // This handler is passed to the form to update the UI instantly
-  const handleAddTransaction = (newTransaction) => {
-    setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
+  const handleDataUpdate = () => {
+    fetchDashboardData();
   };
 
   return (
@@ -59,11 +68,12 @@ const Dashboard = ({ onLogout, token }) => {
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Left Column: Add Transaction Form */}
-          <div className="lg:col-span-1">
-            <TransactionForm token={token} onAddTransaction={handleAddTransaction} />
+          {/* --- THIS IS THE FIX --- */}
+          {/* I've added the `space-y-8` class here to create vertical spacing */}
+          <div className="lg:col-span-1 space-y-8">
+            <TransactionForm token={token} onAddTransaction={handleDataUpdate} />
+            <BudgetManager token={token} budgets={budgets} onSetBudget={handleDataUpdate} currentDate={currentDate} />
           </div>
-          {/* Right Column: Transaction List */}
           <div className="lg:col-span-2">
             <TransactionList transactions={transactions} isLoading={isLoading} error={error} />
           </div>
