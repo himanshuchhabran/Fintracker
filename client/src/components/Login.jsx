@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 
-const Login = ({ onSwitchForm }) => {
+const Login = ({ onSwitchForm,onLoginSuccess }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -31,6 +31,7 @@ const Login = ({ onSwitchForm }) => {
         localStorage.setItem('token', data.token);
         setIsSuccess(true);
         setMessage('Login successful! Redirecting...');
+        onLoginSuccess(data.token);
       } else {
         setIsSuccess(false);
         setMessage(data.message || 'Login failed.');
