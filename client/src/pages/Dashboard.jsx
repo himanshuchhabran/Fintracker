@@ -3,10 +3,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import BudgetManager from '../components/BudgetManager';
+import SpendingPieChart from '../components/SpendingPieChart'; // Import Pie Chart
+import SpendingBarChart from '../components/SpendingBarChart'; // Import Bar Chart
 
 const Dashboard = ({ onLogout, token }) => {
   const [transactions, setTransactions] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  const [summaryData, setSummaryData] = useState({ spendingByCategory: [], monthlySpending: [] });
   const [currentDate, setCurrentDate] = useState(new Date());
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -18,20 +21,23 @@ const Dashboard = ({ onLogout, token }) => {
     const month = currentDate.getMonth() + 1;
 
     try {
-      const [transRes, budgRes] = await Promise.all([
+      const [transRes, budgRes, summaryRes] = await Promise.all([
         fetch(`/api/transactions`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`/api/budgets/${year}/${month}`, { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`/api/budgets/${year}/${month}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`/api/dashboard/summary`, { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
 
-      if (!transRes.ok || !budgRes.ok) {
+      if (!transRes.ok || !budgRes.ok || !summaryRes.ok) {
         throw new Error('Failed to fetch dashboard data.');
       }
 
       const transData = await transRes.json();
       const budgData = await budgRes.json();
+      const summaryData = await summaryRes.json();
       
       setTransactions(transData);
       setBudgets(budgData);
+      setSummaryData(summaryData);
 
     } catch (err) {
       setError(err.message);
@@ -67,9 +73,20 @@ const Dashboard = ({ onLogout, token }) => {
         </nav>
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Dashboard Area */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Monthly Spending Trend</h3>
+                <SpendingBarChart chartData={summaryData.monthlySpending} />
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Expenses by Category</h3>
+                <SpendingPieChart chartData={summaryData.spendingByCategory} />
+            </div>
+        </div>
+
+        {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* --- THIS IS THE FIX --- */}
-          {/* I've added the `space-y-8` class here to create vertical spacing */}
           <div className="lg:col-span-1 space-y-8">
             <TransactionForm token={token} onAddTransaction={handleDataUpdate} />
             <BudgetManager token={token} budgets={budgets} onSetBudget={handleDataUpdate} currentDate={currentDate} />
