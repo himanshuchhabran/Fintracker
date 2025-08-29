@@ -8,6 +8,7 @@ import EditTransactionModal from '../components/EditTransactionModal';
 import EditBudgetModal from '../components/EditBudgetModal';
 import GoalsPage from './GoalsPage'; // Import the new Goals page
 import RiskAssessmentPage from './RiskAssessmentPage';
+import { getApiUrl } from '../api'; 
 
 // MainDashboard component to hold the primary view
 const MainDashboard = ({ token }) => {
@@ -31,12 +32,11 @@ const MainDashboard = ({ token }) => {
         const month = currentDate.getMonth() + 1;
 
         try {
-            const [transRes, budgRes, summaryRes] = await Promise.all([
-                fetch(`/api/transactions`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`/api/budgets/${year}/${month}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`/api/dashboard/summary`, { headers: { 'Authorization': `Bearer ${token}` } })
+           const [transRes, budgRes, summaryRes] = await Promise.all([
+                fetch(getApiUrl('transactions'), { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(getApiUrl(`budgets/${year}/${month}`), { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(getApiUrl('dashboard/summary'), { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
-
             if (!transRes.ok || !budgRes.ok || !summaryRes.ok) {
                 throw new Error('Failed to fetch dashboard data.');
             }

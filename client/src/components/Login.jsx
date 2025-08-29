@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { getApiUrl } from '../api';
 
 const Login = ({ onSwitchForm,onLoginSuccess }) => {
   const [formData, setFormData] = useState({
@@ -19,12 +20,12 @@ const Login = ({ onSwitchForm,onLoginSuccess }) => {
     setIsSuccess(false);
     setMessage('');
     try {
-      const res = await fetch('/api/auth/login', {
+      // Use the helper to get the correct API URL
+      const res = await fetch(getApiUrl('auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData),
       });
-
       const data = await res.json();
 
       if (res.ok) {

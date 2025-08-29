@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiUrl } from '../api';
 
 const Register = ({ onRegisterSuccess, onSwitchForm }) => {
   const [formData, setFormData] = useState({
@@ -20,10 +21,10 @@ const Register = ({ onRegisterSuccess, onSwitchForm }) => {
     setMessage('');
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(getApiUrl('auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
