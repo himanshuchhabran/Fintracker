@@ -4,6 +4,8 @@ const userRoutes = require("./routes/user");
 const transactionRoutes = require("./routes/transactions");
 const budgetRoutes = require("./routes/budgets");
 const dashboardRoutes = require('./routes/dashboard');
+const riskRoutes = require('./routes/risk'); 
+const goalRoutes = require('./routes/goals');
 const app = express();
 const pool = require("./config/db");
 
@@ -17,6 +19,8 @@ app.use("/api",userRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/dashboard', dashboardRoutes); 
+app.use('/api/risk', riskRoutes); 
+app.use('/api/goals', goalRoutes);
 
 // A test route to check database connection
 app.get('/test-db', async (req, res) => {

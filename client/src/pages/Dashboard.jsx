@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
@@ -7,79 +6,111 @@ import SpendingPieChart from '../components/SpendingPieChart';
 import SpendingBarChart from '../components/SpendingBarChart';
 import EditTransactionModal from '../components/EditTransactionModal';
 import EditBudgetModal from '../components/EditBudgetModal';
+import GoalsPage from './GoalsPage'; // Import the new Goals page
+import RiskAssessmentPage from './RiskAssessmentPage';
+
+// MainDashboard component to hold the primary view
+const MainDashboard = ({ token }) => {
+    const [transactions, setTransactions] = useState([]);
+    const [budgets, setBudgets] = useState([]);
+    const [summaryData, setSummaryData] = useState({ spendingByCategory: [], monthlySpending: [] });
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [transactionToEdit, setTransactionToEdit] = useState(null);
+    
+    const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+    const [budgetToEdit, setBudgetToEdit] = useState(null);
+
+    const fetchDashboardData = useCallback(async () => {
+        setIsLoading(true);
+        setError('');
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1;
+
+        try {
+            const [transRes, budgRes, summaryRes] = await Promise.all([
+                fetch(`/api/transactions`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`/api/budgets/${year}/${month}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`/api/dashboard/summary`, { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+
+            if (!transRes.ok || !budgRes.ok || !summaryRes.ok) {
+                throw new Error('Failed to fetch dashboard data.');
+            }
+
+            const transData = await transRes.json();
+            const budgData = await budgRes.json();
+            const summaryData = await summaryRes.json();
+            
+            setTransactions(transData);
+            setBudgets(budgData);
+            setSummaryData(summaryData);
+
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [token, currentDate]);
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, [fetchDashboardData]);
+
+    const handleDataUpdate = () => { fetchDashboardData(); };
+    const handleOpenEditModal = (transaction) => { setTransactionToEdit(transaction); setIsEditModalOpen(true); };
+    const handleCloseEditModal = () => { setTransactionToEdit(null); setIsEditModalOpen(false); };
+    const handleOpenBudgetModal = (budget) => { setBudgetToEdit(budget); setIsBudgetModalOpen(true); };
+    const handleCloseBudgetModal = () => { setBudgetToEdit(null); setIsBudgetModalOpen(false); };
+
+    return (
+        <>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Monthly Spending Trend</h3>
+                    <SpendingBarChart chartData={summaryData.monthlySpending} />
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Expenses by Category</h3>
+                    <SpendingPieChart chartData={summaryData.spendingByCategory} />
+                </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div className="lg:col-span-1 space-y-8">
+                    <TransactionForm token={token} onAddTransaction={handleDataUpdate} />
+                    <BudgetManager token={token} budgets={budgets} onSetBudget={handleDataUpdate} onEditBudget={handleOpenBudgetModal} onDeleteBudget={handleDataUpdate} currentDate={currentDate} />
+                </div>
+                <div className="lg:col-span-2">
+                    <TransactionList transactions={transactions} isLoading={isLoading} error={error} onEdit={handleOpenEditModal} onDelete={handleDataUpdate} token={token} />
+                </div>
+            </div>
+            {isEditModalOpen && <EditTransactionModal token={token} transaction={transactionToEdit} onClose={handleCloseEditModal} onUpdate={handleDataUpdate} />}
+            {isBudgetModalOpen && <EditBudgetModal token={token} budget={budgetToEdit} onClose={handleCloseBudgetModal} onUpdate={handleDataUpdate} />}
+        </>
+    );
+};
+
 
 const Dashboard = ({ onLogout, token }) => {
-  const [transactions, setTransactions] = useState([]);
-  const [budgets, setBudgets] = useState([]);
-  const [summaryData, setSummaryData] = useState({ spendingByCategory: [], monthlySpending: [] });
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [activeView, setActiveView] = useState('dashboard');
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [transactionToEdit, setTransactionToEdit] = useState(null);
-  
-  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
-  const [budgetToEdit, setBudgetToEdit] = useState(null);
-
-  const fetchDashboardData = useCallback(async () => {
-    setIsLoading(true);
-    setError('');
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
-
-    try {
-      const [transRes, budgRes, summaryRes] = await Promise.all([
-        fetch(`/api/transactions`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`/api/budgets/${year}/${month}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`/api/dashboard/summary`, { headers: { 'Authorization': `Bearer ${token}` } })
-      ]);
-
-      if (!transRes.ok || !budgRes.ok || !summaryRes.ok) {
-        throw new Error('Failed to fetch dashboard data.');
-      }
-
-      const transData = await transRes.json();
-      const budgData = await budgRes.json();
-      const summaryData = await summaryRes.json();
-      
-      setTransactions(transData);
-      setBudgets(budgData);
-      setSummaryData(summaryData);
-
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
+  const renderView = () => {
+    switch (activeView) {
+      case 'goals':
+        return <GoalsPage token={token} />;
+      case 'risk':
+        return (
+            <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200 max-w-3xl mx-auto">
+                <RiskAssessmentPage token={token} onComplete={() => setActiveView('dashboard')} />
+            </div>
+        );
+      case 'dashboard':
+      default:
+        return <MainDashboard token={token} />;
     }
-  }, [token, currentDate]);
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
-
-  const handleDataUpdate = () => {
-    fetchDashboardData();
-  };
-
-  const handleOpenEditModal = (transaction) => {
-    setTransactionToEdit(transaction);
-    setIsEditModalOpen(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setTransactionToEdit(null);
-    setIsEditModalOpen(false);
-  };
-  
-  const handleOpenBudgetModal = (budget) => {
-    setBudgetToEdit(budget);
-    setIsBudgetModalOpen(true);
-  };
-
-  const handleCloseBudgetModal = () => {
-    setBudgetToEdit(null);
-    setIsBudgetModalOpen(false);
   };
 
   return (
@@ -92,67 +123,17 @@ const Dashboard = ({ onLogout, token }) => {
             </svg>
             <h1 className="text-2xl font-bold text-gray-800">Mudra-Plan</h1>
           </div>
-          <button 
-            onClick={onLogout}
-            className="bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-          >
-            Logout
-          </button>
+          <div className="flex items-center space-x-4">
+            <button onClick={() => setActiveView('dashboard')} className={`font-semibold transition ${activeView === 'dashboard' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Dashboard</button>
+            <button onClick={() => setActiveView('goals')} className={`font-semibold transition ${activeView === 'goals' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Goals</button>
+            <button onClick={() => setActiveView('risk')} className={`font-semibold transition ${activeView === 'risk' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Risk Profile</button>
+            <button onClick={onLogout} className="bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-200">Logout</button>
+          </div>
         </nav>
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Monthly Spending Trend</h3>
-                <SpendingBarChart chartData={summaryData.monthlySpending} />
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Expenses by Category</h3>
-                <SpendingPieChart chartData={summaryData.spendingByCategory} />
-            </div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-1 space-y-8">
-            <TransactionForm token={token} onAddTransaction={handleDataUpdate} />
-            <BudgetManager 
-              token={token} 
-              budgets={budgets} 
-              onSetBudget={handleDataUpdate} 
-              onEditBudget={handleOpenBudgetModal}
-              onDeleteBudget={handleDataUpdate}
-              currentDate={currentDate} 
-            />
-          </div>
-          <div className="lg:col-span-2">
-            <TransactionList 
-              transactions={transactions} 
-              isLoading={isLoading} 
-              error={error}
-              onEdit={handleOpenEditModal}
-              onDelete={handleDataUpdate}
-              token={token}
-            />
-          </div>
-        </div>
+        {renderView()}
       </main>
-      
-      {isEditModalOpen && (
-        <EditTransactionModal
-          token={token}
-          transaction={transactionToEdit}
-          onClose={handleCloseEditModal}
-          onUpdate={handleDataUpdate}
-        />
-      )}
-      
-      {isBudgetModalOpen && (
-        <EditBudgetModal
-            token={token}
-            budget={budgetToEdit}
-            onClose={handleCloseBudgetModal}
-            onUpdate={handleDataUpdate}
-        />
-      )}
     </div>
   );
 };

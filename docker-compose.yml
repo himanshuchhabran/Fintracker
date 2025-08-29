@@ -1,4 +1,12 @@
 services:
+  ai_service:
+    build: ./ai_service
+    container_name: mudra_plan_ai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai_service:/app
+
   postgres-db:
     image: postgres:15-alpine
     container_name: mudra_plan_db
