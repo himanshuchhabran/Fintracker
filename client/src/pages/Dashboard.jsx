@@ -40,7 +40,7 @@ const MainDashboard = ({ token }) => {
             if (!transRes.ok || !budgRes.ok || !summaryRes.ok) {
                 throw new Error('Failed to fetch dashboard data.');
             }
-
+            
             const transData = await transRes.json();
             const budgData = await budgRes.json();
             const summaryData = await summaryRes.json();

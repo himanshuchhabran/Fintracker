@@ -13,7 +13,7 @@ const cors = require('cors');
 const port = process.env.SERVER_PORT || 5000;
 
 const corsOptions = {
-  origin: 'https://mudra-plan.vercel.app/', // Replace with your Vercel URL
+  origin: ['http://localhost:5173', 'https://mudra-plan.vercel.app'], // <-- Corrected
 };
 app.use(cors(corsOptions));
 // Middleware to parse JSON bodies
