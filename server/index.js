@@ -8,10 +8,17 @@ const riskRoutes = require('./routes/risk');
 const goalRoutes = require('./routes/goals');
 const app = express();
 const pool = require("./config/db");
+const cors = require('cors');
 
 const port = process.env.SERVER_PORT || 5000;
+
+const corsOptions = {
+  origin: 'https://mudra-plan.vercel.app/', // Replace with your Vercel URL
+};
+app.use(cors(corsOptions));
 // Middleware to parse JSON bodies
 app.use(express.json());
+
 
 
 
