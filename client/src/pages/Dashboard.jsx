@@ -96,6 +96,7 @@ const MainDashboard = ({ token }) => {
 
 const Dashboard = ({ onLogout, token }) => {
   const [activeView, setActiveView] = useState('dashboard');
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
 
   const renderView = () => {
     switch (activeView) {
@@ -114,22 +115,48 @@ const Dashboard = ({ onLogout, token }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h1 className="text-2xl font-bold text-gray-800">Mudra-Plan</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button onClick={() => setActiveView('dashboard')} className={`font-semibold transition ${activeView === 'dashboard' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Dashboard</button>
-            <button onClick={() => setActiveView('goals')} className={`font-semibold transition ${activeView === 'goals' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Goals</button>
-            <button onClick={() => setActiveView('risk')} className={`font-semibold transition ${activeView === 'risk' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Risk Profile</button>
-            <button onClick={onLogout} className="bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-200">Logout</button>
-          </div>
-        </nav>
+     <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm border-b border-gray-200 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+                {/* Logo */}
+                <div className="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h1 className="text-2xl font-bold text-gray-800">Mudra-Plan</h1>
+                </div>
+
+                {/* Desktop Navigation */}
+                <div className="hidden md:flex items-center space-x-6">
+                    <button onClick={() => setActiveView('dashboard')} className={`font-semibold transition ${activeView === 'dashboard' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Dashboard</button>
+                    <button onClick={() => setActiveView('goals')} className={`font-semibold transition ${activeView === 'goals' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Goals</button>
+                    <button onClick={() => setActiveView('risk')} className={`font-semibold transition ${activeView === 'risk' ? 'text-emerald-600' : 'text-gray-600 hover:text-emerald-600'}`}>Risk Profile</button>
+                    <button onClick={onLogout} className="bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-200">Logout</button>
+                </div>
+
+                {/* Mobile Menu Button (Hamburger) */}
+                <div className="md:hidden">
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-md text-gray-600 hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMenuOpen && (
+            <div className="md:hidden bg-white border-t border-gray-200">
+                <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <button onClick={() => { setActiveView('dashboard'); setIsMenuOpen(false); }} className={`block w-full text-left px-3 py-2 rounded-md font-medium ${activeView === 'dashboard' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600 hover:bg-gray-50'}`}>Dashboard</button>
+                    <button onClick={() => { setActiveView('goals'); setIsMenuOpen(false); }} className={`block w-full text-left px-3 py-2 rounded-md font-medium ${activeView === 'goals' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600 hover:bg-gray-50'}`}>Goals</button>
+                    <button onClick={() => { setActiveView('risk'); setIsMenuOpen(false); }} className={`block w-full text-left px-3 py-2 rounded-md font-medium ${activeView === 'risk' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600 hover:bg-gray-50'}`}>Risk Profile</button>
+                    <button onClick={onLogout} className="block w-full text-left px-3 py-2 rounded-md font-medium text-red-600 hover:bg-red-50">Logout</button>
+                </div>
+            </div>
+        )}
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {renderView()}

@@ -55,7 +55,10 @@ const TransactionList = ({ transactions, isLoading, error, onEdit, onDelete, tok
             </div>
             <div className="flex items-center">
                 <p className="font-bold text-lg text-red-600 mr-4">-₹{parseFloat(t.amount).toFixed(2)}</p>
-                <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* --- THIS IS THE FIX --- */}
+                {/* Buttons are now always visible on mobile (opacity-100) */}
+                {/* and only become hover-to-see on medium screens and up (md:opacity-0) */}
+                <div className="flex space-x-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     <button onClick={() => onEdit(t)} title="Edit" className="p-1 rounded-full hover:bg-gray-200">
                         <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" />
