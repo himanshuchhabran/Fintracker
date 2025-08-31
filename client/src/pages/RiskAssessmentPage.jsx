@@ -80,19 +80,26 @@ const RiskAssessmentPage = ({ token, onComplete }) => {
             <div className="text-center">
                 <h2 className="text-2xl font-bold text-emerald-600 mb-2">Your Investor Profile is Ready!</h2>
                 <p className="text-5xl font-bold text-gray-800 mb-4">{result.risk_profile}</p>
-                <p className="text-gray-600 mb-6">{result.recommendations.description}</p>
+                <p className="text-gray-600 mb-6">{result.recommendations?.description}</p>
                 
                 <div className="text-left my-8 space-y-4">
                     <h3 className="font-bold text-lg text-gray-800 border-b pb-2">Suggested Portfolio Allocation:</h3>
-                    {result.recommendations.portfolio.map((item, index) => (
-                        <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                            <div className="flex justify-between items-center">
-                                <span className="font-semibold text-gray-700">{item.instrument}</span>
-                                <span className="font-bold text-emerald-600">{item.allocation}</span>
+                    
+                    {/* --- THIS IS THE FIX --- */}
+                    {/* Add a check to ensure the portfolio array exists and has items before mapping over it. */}
+                    {result?.recommendations?.portfolio?.length > 0 ? (
+                        result.recommendations.portfolio.map((item, index) => (
+                            <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-semibold text-gray-700">{item.instrument}</span>
+                                    <span className="font-bold text-emerald-600">{item.allocation}</span>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-1">{item.details}</p>
                             </div>
-                            <p className="text-sm text-gray-500 mt-1">{item.details}</p>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <p className="text-center text-gray-500 py-4">No portfolio recommendations available at this time.</p>
+                    )}
                 </div>
 
                 <button onClick={onComplete} className="bg-emerald-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-emerald-700 transition">
@@ -133,3 +140,4 @@ const RiskAssessmentPage = ({ token, onComplete }) => {
 };
 
 export default RiskAssessmentPage;
+
