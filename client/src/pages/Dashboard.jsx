@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import TransactionForm from '../components/TransactionForm';
-import TransactionList from '../components-TransactionList'; // Corrected path
+import TransactionList from '../components/TransactionList'; // Corrected path
 import BudgetManager from '../components/BudgetManager';
-import SpendingPieChart from '../components-SpendingPieChart'; // Corrected path
+import SpendingPieChart from '../components/SpendingPieChart'; // Corrected path
 import SpendingBarChart from '../components/SpendingBarChart';
 import EditTransactionModal from '../components/EditTransactionModal';
 import EditBudgetModal from '../components/EditBudgetModal';
