@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../api'; // 1. Import the helper
 
 const EditBudgetModal = ({ token, budget, onClose, onUpdate }) => {
   const [limitAmount, setLimitAmount] = useState('');
@@ -17,22 +18,21 @@ const EditBudgetModal = ({ token, budget, onClose, onUpdate }) => {
     setError('');
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/budgets`, {
-        method: 'POST', // Use POST for upsert logic
+      // 2. Use the helper and the correct URL with the budget ID
+      const res = await fetch(getApiUrl(`/budgets/${budget.id}`), {
+        method: 'PUT', // 3. Use PUT for updating an existing resource
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-            category: budget.category,
             limit_amount: parseFloat(limitAmount),
-            month: budget.month,
-            year: budget.year,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to update budget');
       onUpdate();
+      onClose(); // Close modal on success
     } catch (err) {
       setError(err.message);
     } finally {
@@ -48,7 +48,7 @@ const EditBudgetModal = ({ token, budget, onClose, onUpdate }) => {
         <div className="flex justify-between items-center mb-6">
             <h3 className="text-2xl font-bold text-gray-800">Edit Budget for {budget.category}</h3>
             <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200">
-                <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
@@ -59,6 +59,8 @@ const EditBudgetModal = ({ token, budget, onClose, onUpdate }) => {
             <input
               type="number" name="limit" id="edit-limit" value={limitAmount}
               onChange={(e) => setLimitAmount(e.target.value)} placeholder="0.00" required
+              min="0"
+              step="0.01"
               className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>

@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { getApiUrl } from '../api'; // 1. Import the helper
 
 const questions = [
     {
@@ -56,7 +56,8 @@ const RiskAssessmentPage = ({ token, onComplete }) => {
         setIsLoading(true);
 
         try {
-            const res = await fetch('/api/risk/submit', {
+            // 2. Use the helper function here, removing /api
+            const res = await fetch(getApiUrl('risk/submit'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

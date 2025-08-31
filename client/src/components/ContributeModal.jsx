@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { getApiUrl } from '../api'; // 1. Import the helper
 
 const ContributeModal = ({ token, goal, onClose, onUpdate }) => {
     const [amount, setAmount] = useState('');
@@ -11,7 +12,8 @@ const ContributeModal = ({ token, goal, onClose, onUpdate }) => {
         setError('');
         setIsLoading(true);
         try {
-            const res = await fetch(`/api/goals/${goal.id}/contribute`, {
+            // 2. Use the helper function to construct the correct URL
+            const res = await fetch(getApiUrl(`/goals/${goal.id}/contribute`), {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ amount: parseFloat(amount) }),
@@ -35,7 +37,7 @@ const ContributeModal = ({ token, goal, onClose, onUpdate }) => {
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-2xl font-bold text-gray-800">Contribute to "{goal.goal_name}"</h3>
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200">
-                        <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -43,7 +45,18 @@ const ContributeModal = ({ token, goal, onClose, onUpdate }) => {
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div>
                         <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Contribution Amount (₹)</label>
-                        <input type="number" name="amount" id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" required className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" />
+                        <input 
+                            type="number" 
+                            name="amount" 
+                            id="amount" 
+                            value={amount} 
+                            onChange={(e) => setAmount(e.target.value)} 
+                            placeholder="0.00" 
+                            required 
+                            min="0.01"
+                            step="0.01"
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500" 
+                        />
                     </div>
                     <div className="flex justify-end space-x-4 pt-4">
                         <button type="button" onClick={onClose} className="py-2 px-4 rounded-lg font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition">Cancel</button>

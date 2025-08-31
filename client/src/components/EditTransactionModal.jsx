@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-
+import { getApiUrl } from '../api';
 const EditTransactionModal = ({ token, transaction, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
     amount: '',
@@ -29,7 +29,7 @@ const EditTransactionModal = ({ token, transaction, onClose, onUpdate }) => {
     setError('');
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/transactions/${transaction.id}`, {
+      const res = await fetch(getApiUrl(`transactions/${transaction.id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

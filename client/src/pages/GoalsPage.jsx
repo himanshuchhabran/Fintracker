@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import AddGoalModal from '../components/AddGoalModal';
 import ContributeModal from '../components/ContributeModal';
+import { getApiUrl } from '../api'; // 1. Import the helper
 
 const GoalCard = ({ goal, onContributeClick, onDeleteClick }) => {
     const progress = goal.target_amount > 0 ? (parseFloat(goal.current_amount) / parseFloat(goal.target_amount)) * 100 : 0;
@@ -25,9 +27,14 @@ const GoalCard = ({ goal, onContributeClick, onDeleteClick }) => {
             </p>
 
             <div className="mt-auto flex space-x-2">
-                <button onClick={onContributeClick} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition">Contribute</button>
+                <button 
+                    onClick={onContributeClick} 
+                    disabled={remaining <= 0}
+                    className="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        Contribute
+                </button>
                 <button onClick={onDeleteClick} className="p-2 rounded-lg hover:bg-gray-100" title="Delete Goal">
-                    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                 </button>
@@ -46,7 +53,8 @@ const GoalsPage = ({ token }) => {
     const fetchGoals = useCallback(async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/goals', { headers: { 'Authorization': `Bearer ${token}` } });
+            // 2. Use the helper function here
+            const res = await fetch(getApiUrl('/goals'), { headers: { 'Authorization': `Bearer ${token}` } });
             if (!res.ok) throw new Error('Failed to fetch goals');
             const data = await res.json();
             setGoals(data);
@@ -69,14 +77,15 @@ const GoalsPage = ({ token }) => {
     const handleDeleteClick = async (id) => {
         if (!window.confirm("Are you sure you want to delete this goal? This action cannot be undone.")) return;
         try {
-            await fetch(`/api/goals/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            fetchGoals();
+            // 3. Use the helper function here as well
+            await fetch(getApiUrl(`/goals/${id}`), { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            fetchGoals(); // Refetch goals to update the UI
         } catch (error) {
             alert('Failed to delete goal.');
         }
     };
 
-    if (isLoading) return <p className="text-center text-gray-500">Loading goals...</p>;
+    if (isLoading) return <p className="text-center text-gray-500 py-10">Loading goals...</p>;
 
     return (
         <div>

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { getApiUrl } from '../api'; // 1. Import the helper
 
 const AddGoalModal = ({ token, onClose, onUpdate }) => {
     const [formData, setFormData] = useState({
@@ -18,7 +19,8 @@ const AddGoalModal = ({ token, onClose, onUpdate }) => {
         setError('');
         setIsLoading(true);
         try {
-            const res = await fetch('/api/goals', {
+            // 2. Use the helper function to construct the correct URL
+            const res = await fetch(getApiUrl('/goals'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
@@ -51,15 +53,15 @@ const AddGoalModal = ({ token, onClose, onUpdate }) => {
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div>
                         <label htmlFor="goal_name" className="block text-sm font-medium text-gray-700">Goal Name</label>
-                        <input type="text" name="goal_name" id="goal_name" value={goal_name} onChange={onChange} placeholder="e.g., Vacation to Goa" required className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" />
+                        <input type="text" name="goal_name" id="goal_name" value={goal_name} onChange={onChange} placeholder="e.g., Vacation to Goa" required className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500" />
                     </div>
                     <div>
                         <label htmlFor="target_amount" className="block text-sm font-medium text-gray-700">Target Amount (₹)</label>
-                        <input type="number" name="target_amount" id="target_amount" value={target_amount} onChange={onChange} placeholder="50000" required className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" />
+                        <input type="number" name="target_amount" id="target_amount" value={target_amount} onChange={onChange} placeholder="50000" required min="0.01" step="0.01" className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500" />
                     </div>
                     <div>
                         <label htmlFor="target_date" className="block text-sm font-medium text-gray-700">Target Date (Optional)</label>
-                        <input type="date" name="target_date" id="target_date" value={target_date} onChange={onChange} className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" />
+                        <input type="date" name="target_date" id="target_date" value={target_date} onChange={onChange} min={new Date().toISOString().split("T")[0]} className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500" />
                     </div>
                     <div className="flex justify-end space-x-4 pt-4">
                         <button type="button" onClick={onClose} className="py-2 px-4 rounded-lg font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition">Cancel</button>
