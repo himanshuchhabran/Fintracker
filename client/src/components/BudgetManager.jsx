@@ -1,4 +1,3 @@
-// client/src/components/BudgetManager.jsx (UPDATED & FIXED)
 
 import React, { useState, useMemo } from 'react';
 import { getApiUrl } from '../api';
@@ -52,6 +51,10 @@ const BudgetManager = ({ token, budgets=[], onBudgetUpdate, currentDate, transac
     // Calculate total spending per category for the current month
     const spendingMap = useMemo(() => {
         const map = {};
+        // --- FIX: Ensure transactions is an array before calling forEach ---
+        if (!Array.isArray(transactions)) {
+            return map;
+        }
         transactions.forEach(t => {
             const transactionMonth = new Date(t.transaction_date).getMonth();
             const transactionYear = new Date(t.transaction_date).getFullYear();
@@ -70,8 +73,8 @@ const BudgetManager = ({ token, budgets=[], onBudgetUpdate, currentDate, transac
         setError('');
         setIsLoading(true);
         try {
-            // This POST route on the backend is designed to handle both create and update (upsert)
-            const res = await fetch(getApiUrl('/budgets'), {
+            // --- FIX: Remove leading slash from the path ---
+            const res = await fetch(getApiUrl('budgets'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
@@ -95,7 +98,8 @@ const BudgetManager = ({ token, budgets=[], onBudgetUpdate, currentDate, transac
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this budget?')) return;
         try {
-            const res = await fetch(getApiUrl(`/budgets/${id}`), {
+            // --- FIX: Remove leading slash from the path ---
+            const res = await fetch(getApiUrl(`budgets/${id}`), {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -169,3 +173,4 @@ const BudgetManager = ({ token, budgets=[], onBudgetUpdate, currentDate, transac
 };
 
 export default BudgetManager;
+
