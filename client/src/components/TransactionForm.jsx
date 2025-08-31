@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { getApiUrl } from '../api';
 
 const TransactionForm = ({ token, onAddTransaction }) => {
   const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ const TransactionForm = ({ token, onAddTransaction }) => {
     setError('');
     setIsLoading(true);
     try {
-      const res = await fetch('/api/transactions', {
+       const res = await fetch(getApiUrl('transactions'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -24,20 +24,26 @@ exports.signup = async (req, res) => {
     // Set OTP expiry time to 10 minutes from now
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Insert into DB
-    const newUser = await pool.query(
-      "INSERT INTO users (email, password_hash,otp, otp_expires_at) VALUES ($1, $2, $3, $4) RETURNING id, email",
-      [email, passwordHash, otp, otpExpiresAt]
-    );
-
-     // Send the OTP email
+    const existingUserResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const existingUser = existingUserResult.rows[0];
+if (existingUser) {
+      if (existingUser.is_verified) {
+        return res.status(409).json({ message: 'An account with this email already exists.' });
+      } else {
+        await pool.query(
+          'UPDATE users SET password_hash = $1, otp = $2, otp_expires_at = $3 WHERE email = $4',
+          [passwordHash, otp, otpExpiresAt, email]
+        );
+      }
+    } else {
+      await pool.query(
+        'INSERT INTO users (email, password_hash, otp, otp_expires_at) VALUES ($1, $2, $3, $4)',
+        [email, passwordHash, otp, otpExpiresAt]
+      );
+    }
     await sendOTPEmail(email, otp);
+    res.status(201).json({ message: 'Registration successful. Please check your email for an OTP.', user: { email } });
 
-    res.status(201).json({
-      success: true,
-      message: "User created successfully. Please check your email for an OTP.",
-      user: newUser.rows[0]
-    });
   } catch (error) {
     console.error("Registration error:", error);
 
@@ -82,6 +88,9 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid credentials." });
     }
 
+    if (!user.is_verified) {
+      return res.status(403).json({ message: 'Please register first' });
+    }
     // Generate JWT
     const payload = {
       user: {
