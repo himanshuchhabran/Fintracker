@@ -40,7 +40,7 @@ const BudgetProgressBar = ({ category, limit, spent, onEdit, onDelete }) => {
 };
 
 
-const BudgetManager = ({ token, budgets, onBudgetUpdate, currentDate, transactions }) => {
+const BudgetManager = ({ token, budgets=[], onBudgetUpdate, currentDate, transactions =[]}) => {
     const [category, setCategory] = useState('Food');
     const [limit, setLimit] = useState('');
     const [error, setError] = useState('');

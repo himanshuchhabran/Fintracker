@@ -81,7 +81,7 @@ const MainDashboard = ({ token }) => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 <div className="lg:col-span-1 space-y-8">
                     <TransactionForm token={token} onAddTransaction={handleDataUpdate} />
-                    <BudgetManager token={token} budgets={budgets} onSetBudget={handleDataUpdate} onEditBudget={handleOpenBudgetModal} onDeleteBudget={handleDataUpdate} currentDate={currentDate} />
+                    <BudgetManager token={token} budgets={budgets || []} onSetBudget={handleDataUpdate} onEditBudget={handleOpenBudgetModal} onDeleteBudget={handleDataUpdate} currentDate={currentDate} />
                 </div>
                 <div className="lg:col-span-2">
                     <TransactionList transactions={transactions} isLoading={isLoading} error={error} onEdit={handleOpenEditModal} onDelete={handleDataUpdate} token={token} />
