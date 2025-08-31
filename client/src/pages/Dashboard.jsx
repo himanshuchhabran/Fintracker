@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import TransactionForm from '../components/TransactionForm';
-import TransactionList from '../components/TransactionList';
+import TransactionList from '../components-TransactionList'; // Corrected path
 import BudgetManager from '../components/BudgetManager';
-import SpendingPieChart from '../components/SpendingPieChart';
+import SpendingPieChart from '../components-SpendingPieChart'; // Corrected path
 import SpendingBarChart from '../components/SpendingBarChart';
 import EditTransactionModal from '../components/EditTransactionModal';
 import EditBudgetModal from '../components/EditBudgetModal';
@@ -17,20 +17,17 @@ const Dashboard = ({ onLogout, token }) => {
   
   const [transactions, setTransactions] = useState([]);
   const [budgets, setBudgets] = useState([]);
-  // Safely initialize summaryData to prevent render errors
   const [summaryData, setSummaryData] = useState({ spendingByCategory: [], monthlySpending: [] });
   const [currentDate, setCurrentDate] = useState(new Date());
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Modal States
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [editingBudget, setEditingBudget] = useState(null);
 
   // --- Data Fetching ---
   const fetchDashboardData = useCallback(async () => {
-    // Don't refetch if not on the main dashboard view
     if (activeView !== 'dashboard') {
         setIsLoading(false);
         return;
@@ -74,7 +71,27 @@ const Dashboard = ({ onLogout, token }) => {
   // --- Event Handlers ---
   const handleDataUpdate = () => fetchDashboardData();
 
-  // --- View Rendering ---
+  const handleDeleteTransaction = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this expense?')) return;
+
+    try {
+        const res = await fetch(getApiUrl(`transactions/${id}`), {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to delete transaction.');
+        }
+
+        handleDataUpdate();
+
+    } catch (err) {
+        alert(err.message);
+    }
+  };
+
   const renderView = () => {
     switch (activeView) {
       case 'goals':
@@ -105,14 +122,21 @@ const Dashboard = ({ onLogout, token }) => {
                         <BudgetManager token={token} budgets={budgets} onBudgetUpdate={handleDataUpdate} currentDate={currentDate} transactions={transactions} onEditBudget={setEditingBudget} />
                     </div>
                     <div className="lg:col-span-2">
-                        <TransactionList transactions={transactions} isLoading={isLoading} error={error} onEdit={setEditingTransaction} onDataUpdate={handleDataUpdate} token={token} />
+                        <TransactionList 
+                            transactions={transactions} 
+                            isLoading={isLoading} 
+                            error={error} 
+                            onEdit={setEditingTransaction} 
+                            onDelete={handleDeleteTransaction} // This now correctly passes the delete handler
+                        />
                     </div>
                 </div>
             </>
         );
     }
   };
-
+  
+  // --- Reusable Navigation Button Components ---
   const NavButton = ({ viewName, children }) => {
     const isActive = activeView === viewName;
     return (
@@ -139,54 +163,52 @@ const Dashboard = ({ onLogout, token }) => {
 
   return (
      <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
-                <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setActiveView('dashboard')}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h1 className="text-2xl font-bold text-gray-800">Mudra-Plan</h1>
-                </div>
-
-                <nav className="hidden md:flex items-center space-x-6">
-                    <NavButton viewName="dashboard">Dashboard</NavButton>
-                    <NavButton viewName="goals">Goals</NavButton>
-                    <NavButton viewName="risk">Risk Profile</NavButton>
-                    <button onClick={onLogout} className="bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-200">Logout</button>
-                </nav>
-
-                <div className="md:hidden">
-                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-md text-gray-600 hover:bg-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center py-4">
+                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setActiveView('dashboard')}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                    </button>
+                        <h1 className="text-2xl font-bold text-gray-800">Mudra-Plan</h1>
+                    </div>
+
+                    <nav className="hidden md:flex items-center space-x-6">
+                        <NavButton viewName="dashboard">Dashboard</NavButton>
+                        <NavButton viewName="goals">Goals</NavButton>
+                        <NavButton viewName="risk">Risk Profile</NavButton>
+                        <button onClick={onLogout} className="bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-200">Logout</button>
+                    </nav>
+
+                    <div className="md:hidden">
+                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-md text-gray-600 hover:bg-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {isMenuOpen && (
-            <div className="md:hidden bg-white border-t border-gray-200">
-                <nav className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                    <MobileNavButton viewName="dashboard">Dashboard</MobileNavButton>
-                    <MobileNavButton viewName="goals">Goals</MobileNavButton>
-                    <MobileNavButton viewName="risk">Risk Profile</MobileNavButton>
-                    <button onClick={onLogout} className="block w-full text-left px-3 py-2 rounded-md font-medium text-red-600 hover:bg-red-50">Logout</button>
-                </nav>
-            </div>
-        )}
-      </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderView()}
-      </main>
-
-      {/* Modals are now managed at the top level */}
-      {editingTransaction && <EditTransactionModal token={token} transaction={editingTransaction} onClose={() => setEditingTransaction(null)} onUpdate={handleDataUpdate} />}
-      {editingBudget && <EditBudgetModal token={token} budget={editingBudget} onClose={() => setEditingBudget(null)} onUpdate={handleDataUpdate} />}
+            {isMenuOpen && (
+                <div className="md:hidden bg-white border-t border-gray-200">
+                    <nav className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                        <MobileNavButton viewName="dashboard">Dashboard</MobileNavButton>
+                        <MobileNavButton viewName="goals">Goals</MobileNavButton>
+                        <MobileNavButton viewName="risk">Risk Profile</MobileNavButton>
+                        <button onClick={onLogout} className="block w-full text-left px-3 py-2 rounded-md font-medium text-red-600 hover:bg-red-50">Logout</button>
+                    </nav>
+                </div>
+            )}
+        </header>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {renderView()}
+        </main>
+        
+        {editingTransaction && <EditTransactionModal token={token} transaction={editingTransaction} onClose={() => setEditingTransaction(null)} onUpdate={handleDataUpdate} />}
+        {editingBudget && <EditBudgetModal token={token} budget={editingBudget} onClose={() => setEditingBudget(null)} onUpdate={handleDataUpdate} />}
     </div>
   );
 };
 
 export default Dashboard;
-
