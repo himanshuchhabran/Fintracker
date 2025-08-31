@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { getApiUrl } from '../api';
 const VerifyOTP = ({ email, onVerificationSuccess }) => {
   const [otp, setOtp] = useState('');
   const [message, setMessage] = useState('');
@@ -12,12 +12,11 @@ const VerifyOTP = ({ email, onVerificationSuccess }) => {
     setMessage('');
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/verify-otp', {
+     const res = await fetch(getApiUrl('auth/verify-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
       });
-
       const data = await res.json();
 
       if (res.ok) {

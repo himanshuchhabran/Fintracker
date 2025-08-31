@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { getApiUrl } from '../api'; 
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-IN', {
@@ -16,10 +17,10 @@ const TransactionList = ({ transactions, isLoading, error, onEdit, onDelete, tok
         return;
     }
     try {
-        const res = await fetch(`/api/transactions/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await fetch(getApiUrl(`transactions/${id}`), {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
         if (!res.ok) throw new Error('Failed to delete transaction');
         onDelete();
     } catch (err) {
