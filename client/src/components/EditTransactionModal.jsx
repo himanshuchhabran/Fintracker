@@ -25,30 +25,38 @@ const EditTransactionModal = ({ token, transaction, onClose, onUpdate }) => {
   const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const onSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-    try {
-      const res = await fetch(getApiUrl(`transactions/${transaction.id}`), {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...formData,
-          amount: parseFloat(formData.amount)
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to update transaction');
-      onUpdate();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  e.preventDefault();
+  
+  // ✅ ADD THIS CHECK
+  if (!token) {
+    setError('Authentication error. Please log in again.');
+    setIsLoading(false); // Make sure to stop loading state
+    return; // Stop the submission
+  }
+  
+  setError('');
+  setIsLoading(true);
+  try {
+    const res = await fetch(getApiUrl(`transactions/${transaction.id}`), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        ...formData,
+        amount: parseFloat(formData.amount)
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to update transaction');
+    onUpdate();
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const categories = ['Food', 'Transport', 'Bills', 'Shopping', 'Entertainment', 'Health', 'Other'];
 
