@@ -10,7 +10,7 @@ const app = express();
 const pool = require("./config/db");
 const cors = require('cors');
 
-const port = process.env.SERVER_PORT || 5000;
+const port = process.env.PORT || 5000;
 
 const corsOptions = {
   origin: ['http://localhost:5173', 'https://mudra-plan.vercel.app'], // <-- Corrected
@@ -47,6 +47,6 @@ app.get('/', (req, res) => {
   res.send('Hello from the Mudra-Plan Server!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running and listening on port ${port}`);
 });
