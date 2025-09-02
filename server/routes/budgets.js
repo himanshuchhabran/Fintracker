@@ -64,14 +64,14 @@ router.get('/:year/:month', authenticateToken, async (req, res) => {
     }
 });
 
-// --- THIS IS THE FIX ---
-// Implemented the missing PUT route to allow for budget updates.
 // @route   PUT api/budgets/:id
 // @desc    Update a budget limit
 // @access  Private
 router.put('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { limit_amount } = req.body;
+    // --- THIS IS THE FIX ---
+    // Changed req.user.user.id to the correct req.user.id
     const userId = req.user.id;
 
     if (!limit_amount || isNaN(parseFloat(limit_amount))) {
@@ -123,3 +123,4 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+
