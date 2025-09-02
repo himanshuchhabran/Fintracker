@@ -73,6 +73,7 @@ const Dashboard = ({ onLogout, token }) => {
   const handleDataUpdate = () => fetchDashboardData();
 
   const handleDeleteTransaction = async (id) => {
+    console.log("printing the id",id);
     if (!window.confirm('Are you sure you want to delete this expense?')) return;
 
     try {
