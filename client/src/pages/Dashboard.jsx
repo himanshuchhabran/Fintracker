@@ -129,6 +129,7 @@ const Dashboard = ({ onLogout, token }) => {
                             error={error} 
                             onEdit={setEditingTransaction} 
                             onDelete={handleDeleteTransaction} // This now correctly passes the delete handler
+                            token={token}
                         />
                     </div>
                 </div>
