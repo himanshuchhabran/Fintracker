@@ -9,8 +9,8 @@ const { authenticateToken } = require('../middlewares/auth');
 router.post('/', authenticateToken, async (req, res) => {
     const { category, limit_amount, month, year } = req.body;
     // --- THIS IS THE FIX ---
-    // Changed req.user.user.id to the correct req.user.id
-    const userId = req.user.id;
+    // Changed req.user.id to the correct req.user.user.id
+    const userId = req.user.user.id;
 
     if (!category || !limit_amount || !month || !year) {
         return res.status(400).json({ message: 'All fields are required.' });
@@ -38,8 +38,8 @@ router.post('/', authenticateToken, async (req, res) => {
 router.get('/:year/:month', authenticateToken, async (req, res) => {
     const { year, month } = req.params;
     // --- THIS IS THE FIX ---
-    // Changed req.user.user.id to the correct req.user.id
-    const userId = req.user.id;
+    // Changed req.user.id to the correct req.user.user.id
+    const userId = req.user.user.id;
 
     try {
         const budgetsWithSpending = await pool.query(
@@ -71,8 +71,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { limit_amount } = req.body;
     // --- THIS IS THE FIX ---
-    // Changed req.user.user.id to the correct req.user.id
-    const userId = req.user.id;
+    // Changed req.user.id to the correct req.user.user.id
+    const userId = req.user.user.id;
 
     if (!limit_amount || isNaN(parseFloat(limit_amount))) {
         return res.status(400).json({ message: 'A valid limit amount is required.' });
@@ -103,8 +103,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     // --- THIS IS THE FIX ---
-    // Changed req.user.user.id to the correct req.user.id
-    const userId = req.user.id;
+    // Changed req.user.id to the correct req.user.user.id
+    const userId = req.user.user.id;
 
     try {
         const deleteResult = await pool.query(
