@@ -27,8 +27,10 @@ const Login = ({ onSwitchForm,onLoginSuccess }) => {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
+       console.log('1. Raw server response from login:', data);
 
       if (res.ok) {
+         console.log('2. Extracted token:', data.token);
         localStorage.setItem('token', data.token);
         setIsSuccess(true);
         setMessage('Login successful! Redirecting...');

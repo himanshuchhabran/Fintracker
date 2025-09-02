@@ -11,6 +11,7 @@ import RiskAssessmentPage from './RiskAssessmentPage';
 import { getApiUrl } from '../api';
 
 const Dashboard = ({ onLogout, token }) => {
+    console.log('4. Dashboard component received token prop:', token);
   // --- State Management ---
   const [activeView, setActiveView] = useState('dashboard');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
