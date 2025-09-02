@@ -14,7 +14,6 @@ function App() {
   }, []); // The empty array [] ensures this runs only once
 
   const handleLogin = (newToken) => {
-     console.log('3. handleLogin in App.js received:', newToken);
     // ✅ This is the crucial line you were missing
     localStorage.setItem('token', newToken); 
     setToken(newToken);

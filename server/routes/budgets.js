@@ -1,15 +1,16 @@
-
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const {authenticateToken} = require('../middlewares/auth');
+const { authenticateToken } = require('../middlewares/auth');
 
 // @route   POST api/budgets
-// @desc    Create or update a budget
+// @desc    Create or update a budget (Upsert)
 // @access  Private
 router.post('/', authenticateToken, async (req, res) => {
     const { category, limit_amount, month, year } = req.body;
-    const userId = req.user.user.id;
+    // --- THIS IS THE FIX ---
+    // Changed req.user.user.id to the correct req.user.id
+    const userId = req.user.id;
 
     if (!category || !limit_amount || !month || !year) {
         return res.status(400).json({ message: 'All fields are required.' });
@@ -36,7 +37,9 @@ router.post('/', authenticateToken, async (req, res) => {
 // @access  Private
 router.get('/:year/:month', authenticateToken, async (req, res) => {
     const { year, month } = req.params;
-    const userId = req.user.user.id;
+    // --- THIS IS THE FIX ---
+    // Changed req.user.user.id to the correct req.user.id
+    const userId = req.user.id;
 
     try {
         const budgetsWithSpending = await pool.query(
@@ -61,12 +64,47 @@ router.get('/:year/:month', authenticateToken, async (req, res) => {
     }
 });
 
+// --- THIS IS THE FIX ---
+// Implemented the missing PUT route to allow for budget updates.
+// @route   PUT api/budgets/:id
+// @desc    Update a budget limit
+// @access  Private
+router.put('/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { limit_amount } = req.body;
+    const userId = req.user.id;
+
+    if (!limit_amount || isNaN(parseFloat(limit_amount))) {
+        return res.status(400).json({ message: 'A valid limit amount is required.' });
+    }
+
+    try {
+        const updatedBudget = await pool.query(
+            `UPDATE budgets SET limit_amount = $1
+             WHERE id = $2 AND user_id = $3
+             RETURNING *`,
+            [limit_amount, id, userId]
+        );
+
+        if (updatedBudget.rows.length === 0) {
+            return res.status(404).json({ message: 'Budget not found or user not authorized.' });
+        }
+        res.json(updatedBudget.rows[0]);
+    } catch (error) {
+        console.error('Error updating budget:', error);
+        res.status(500).json({ message: 'Server error while updating budget.' });
+    }
+});
+
+
 // @route   DELETE api/budgets/:id
 // @desc    Delete a budget
 // @access  Private
 router.delete('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    const userId = req.user.user.id;
+    // --- THIS IS THE FIX ---
+    // Changed req.user.user.id to the correct req.user.id
+    const userId = req.user.id;
 
     try {
         const deleteResult = await pool.query(
