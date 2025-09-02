@@ -12,36 +12,35 @@ const formatDate = (dateString) => {
 const TransactionList = ({ transactions, isLoading, error, onEdit, onDelete, token }) => {
   const [deletingId, setDeletingId] = useState(null);
 
-  const handleDelete = async (id) => {
-  if (!window.confirm('Are you sure you want to delete this transaction?')) return;
+//   const handleDelete = async (id) => {
+//   if (!window.confirm('Are you sure you want to delete this transaction?')) return;
 
-  // ✅ ADD THIS CHECK
-  if (!token) {
-    alert('Authentication error. Please log in again.');
-    return; // Stop the function
-  }
+//   if (!token) {
+//     alert('Authentication error. Please log in again.');
+//     return;
+//   }
 
-  try {
-    setDeletingId(id);
-    const res = await fetch(getApiUrl(`transactions/${id}`), {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+//   try {
+//     setDeletingId(id);
+//     const res = await fetch(getApiUrl(`transactions/${id}`), {
+//       method: 'DELETE',
+//       headers: {
+//         'Authorization': `Bearer ${token}`,
+//       },
+//     });
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || 'Failed to delete transaction');
-    }
+//     if (!res.ok) {
+//       const errorData = await res.json();
+//       throw new Error(errorData.message || 'Failed to delete transaction');
+//     }
 
-    onDelete();
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setDeletingId(null);
-  }
-};
+//     onDelete();
+//   } catch (err) {
+//     alert(err.message);
+//   } finally {
+//     setDeletingId(null);
+//   }
+// };
 
   const renderContent = () => {
     if (isLoading) return <p className="text-center text-gray-500 py-12">Loading transactions...</p>;
