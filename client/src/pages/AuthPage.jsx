@@ -43,7 +43,7 @@ const AuthPage = ({ onLoginSuccess }) => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2" />
             </svg>
-            <h1 className="text-4xl font-bold mb-3">Mudra-Plan</h1>
+            <h1 className="text-4xl font-bold mb-3">Fintracker</h1>
             <p className="text-emerald-100 text-lg">Your journey to financial freedom starts here.</p>
           </div>
         </div>
